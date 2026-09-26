@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>DistroHopper</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="DistroHopper – das Idle-Game für Leute, die ihr Betriebssystem öfter wechseln als ihre Socken.">
+<meta name="theme-color" content="#07090d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Pixelify+Sans:wght@400;500;600;700&family=VT323&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!--APP-->
+<div id="wall" aria-hidden="true"><canvas id="wall-logo" width="32" height="32"></canvas></div>
+
+<div id="app" data-tab="setup">
+  <header id="bar">
+    <div class="bar-l">
+      <button class="brand" id="brand" type="button" aria-label="Über DistroHopper">
+        <img id="brand-tux" alt="" width="24" height="24">
+        <span class="brand-name">Distro<b>Hopper</b></span>
+      </button>
+      <span class="ws" id="ws-distro" title="Aktuelle Distro"><img id="bar-distro-ico" alt="" width="16" height="16"><span id="bar-distro">Ubuntu</span></span>
+    </div>
+    <div class="bar-c">
+      <span class="bar-bytes" id="bar-bytes">0 B</span>
+      <span class="bar-rate" id="bar-rate">0 B/s</span>
+    </div>
+    <div class="bar-r">
+      <div class="buffs" id="bar-buffs"></div>
+      <button id="irc-btn" class="irc-btn" type="button" hidden aria-label="Neue IRC-Nachricht">
+        <img id="irc-ico" alt="" width="16" height="16"><span class="irc-txt">1 neue Nachricht</span><span class="irc-time" id="irc-time"></span>
+      </button>
+      <button id="mute-btn" class="icon-btn" type="button" aria-label="Ton an/aus"><img id="mute-ico" alt="" width="16" height="16"></button>
+      <span class="clock" id="clock">00:00</span>
+    </div>
+  </header>
+
+  <div id="ticker" role="status" aria-live="off">
+    <span class="tk-tag" id="tk-tag">news</span><span class="tk-text" id="tk-text"></span>
+  </div>
+
+  <main id="tiles">
+    <section class="win win-focus" id="w-term" aria-label="Terminal">
+      <div class="win-h">
+        <span class="win-dot"></span>
+        <span class="win-title" id="term-title">tux@ubuntu: ~</span>
+        <span class="sp"></span>
+        <button class="mini-btn" id="shell-btn" type="button" title="Shell öffnen (Strg+Alt+T)">$_ Shell</button>
+        <button class="mini-btn only-narrow" id="term-collapse" type="button" aria-label="Terminal verkleinern">▾</button>
+      </div>
+      <div class="counter">
+        <div class="cnt-big" id="cnt-bytes">0 B</div>
+        <div class="cnt-rate"><span id="cnt-rate">0 B/s</span><span class="cnt-sep">·</span><span id="cnt-click">+1 B</span>&nbsp;pro Klick</div>
+        <div class="cnt-raw" id="cnt-raw">0 Bytes</div>
+        <div class="buffs" id="term-buffs"></div>
+      </div>
+      <div class="crt" id="crt" role="button" tabindex="0" aria-label="Terminal – tippen oder klicken, um Code zu schreiben">
+        <div class="crt-lines" id="crt-lines"></div>
+        <form id="shell-form" class="shell-line" hidden autocomplete="off">
+          <span class="ps1" id="ps1">tux@ubuntu:~$</span>
+          <input id="shell-in" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" aria-label="Shell-Befehl">
+        </form>
+        <div class="crt-hint" id="crt-hint">▶ Tippe hier, um zu coden</div>
+      </div>
+      <div class="term-foot">
+        <div class="tux-wrap">
+          <canvas id="tux" width="26" height="30" aria-label="Tux"></canvas>
+          <div class="bubble" id="bubble" hidden></div>
+        </div>
+        <div class="foot-chips">
+          <button class="chip" id="distro-chip" type="button"></button>
+          <button class="chip" id="beard-chip" type="button"></button>
+        </div>
+      </div>
+      <div class="kbd" id="kbd" aria-hidden="true" title="Tippen = Code schreiben"></div>
+    </section>
+
+    <nav id="tabs" role="tablist" aria-label="Bereiche">
+      <button class="tab" type="button" role="tab" data-tab="shop"><img alt=""><span>Pakete</span><i class="badge" id="badge-shop" hidden></i></button>
+      <button class="tab" type="button" role="tab" data-tab="setup"><img alt=""><span>Setup</span></button>
+      <button class="tab" type="button" role="tab" data-tab="ach"><img alt=""><span>Erfolge</span><i class="badge" id="badge-ach" hidden></i></button>
+      <button class="tab" type="button" role="tab" data-tab="hop"><img alt=""><span>Hop</span><i class="badge" id="badge-hop" hidden></i></button>
+      <button class="tab" type="button" role="tab" data-tab="sys"><img alt=""><span>System</span></button>
+    </nav>
+
+    <section class="win" id="w-center" aria-label="Bereich">
+      <div class="panel" id="p-setup" role="tabpanel"></div>
+      <div class="panel" id="p-ach" role="tabpanel"></div>
+      <div class="panel" id="p-hop" role="tabpanel"></div>
+      <div class="panel" id="p-sys" role="tabpanel"></div>
+    </section>
+
+    <section class="win" id="w-shop" aria-label="Pakete">
+      <div class="win-h">
+        <span class="win-dot"></span>
+        <span class="win-title" id="shop-title">~/pakete — apt</span>
+        <span class="sp"></span>
+        <div class="seg" id="buy-qty" role="group" aria-label="Kaufmenge">
+          <button type="button" data-q="1" class="on">1×</button><button type="button" data-q="10">10×</button><button type="button" data-q="100">100×</button><button type="button" data-q="max">Max</button>
+        </div>
+      </div>
+      <div class="win-b" id="p-shop">
+        <div class="sec-h">
+          <span>Upgrades</span><span class="sec-sub" id="upg-count"></span><span class="sp"></span>
+          <label class="auto-toggle" id="autobuy-wrap" hidden><input type="checkbox" id="autobuy-upg"> auto</label>
+          <button class="mini-btn" id="buy-all" type="button" hidden>Alles kaufen</button>
+        </div>
+        <div class="upg-grid" id="upg-grid"></div>
+        <div class="sec-h">
+          <span>Hardware &amp; Helfer</span><span class="sec-sub" id="bld-count"></span><span class="sp"></span>
+          <label class="auto-toggle" id="autobld-wrap" hidden><input type="checkbox" id="autobuy-bld"> auto</label>
+        </div>
+        <div class="bld-list" id="bld-list"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<div id="actors" aria-hidden="false"></div>
+<div id="toasts" aria-live="polite"></div>
+<div id="tip" role="tooltip" hidden></div>
+<div id="overlay-root"></div>
+<!--/APP-->
+
+<!--SCRIPTS-->
+<script src="js/util.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/data.js"></script>
+<script src="js/content.js"></script>
+<script src="js/game.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/terminal.js"></script>
+<script src="js/shell.js"></script>
+<script src="js/events.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/overlays.js"></script>
+<script src="js/main.js"></script>
+<!--/SCRIPTS-->
+</body>
+</html>

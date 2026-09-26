@@ -1,0 +1,20 @@
+<!doctype html><meta charset="utf-8"><title>Sprites</title>
+<style>body{background:#1b2230;color:#ddd;font:12px monospace;display:flex;flex-wrap:wrap;gap:10px;padding:10px}
+figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px;background:#2a3344;padding:6px;border-radius:6px}
+img{image-rendering:pixelated}</style>
+<script src="../js/util.js"></script><script src="../js/sprites.js"></script>
+<script>
+addEventListener('load',()=>{
+  const S=DH.sprites; const SC=+(location.hash.slice(1)||6); const only=new URLSearchParams(location.search).get("f");
+  for(const k of Object.keys(S.S)){ if(only && !k.match(only)) continue;
+    const c=S.canvas(k); const f=document.createElement('figure');
+    const i=new Image(); i.src=S.url(k); i.width=c.width*SC; i.height=c.height*SC;
+    f.append(i, k+' '+c.width+'x'+c.height); document.body.append(f);
+    const bad=S.S[k].filter(r=>r.length!==S.S[k][0].length);
+    if(bad.length) f.style.outline='2px solid red';
+  }
+  for(let st=0;st<9;st++){const f=document.createElement('figure');const c=S.portrait(st);const i=new Image();i.src=c.toDataURL();i.width=128;i.height=128;f.append(i,'beard '+st);document.body.append(f);}
+  const f=document.createElement('figure');const i=new Image();i.src=S.letterIcon('VIM','#019733');i.width=64;f.append(i,'letter');document.body.append(f);
+  const f2=document.createElement('figure');const i2=new Image();i2.src=S.tierIcon('bash',3);i2.width=72;f2.append(i2,'tier');document.body.append(f2);
+});
+</script>
