@@ -79,16 +79,18 @@ var DH = (typeof window !== 'undefined' ? (window.DH = window.DH || {}) : (globa
   const BIN = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB', 'RiB', 'QiB'];
   const SHORT = ['', 'Tsd.', 'Mio.', 'Mrd.', 'Bio.', 'Brd.', 'Trio.', 'Trd.', 'Quad.', 'Quadrd.', 'Quint.', 'Quintd.', 'Sext.', 'Sextd.', 'Sept.', 'Septd.', 'Okt.', 'Oktd.', 'Non.', 'Nond.', 'Dez.', 'Dezd.'];
 
-  function sig(v, digits) {
-    // v in [1, 1000) -> String mit ~digits signifikanten Stellen
-    const d = v >= 100 ? Math.max(0, digits - 3) : v >= 10 ? Math.max(0, digits - 2) : Math.max(0, digits - 1);
-    return U.dec(v, d);
+  function sig(v, digits, steady) {
+    // v in [1, 1000) -> String mit ~digits signifikanten Stellen, höchstens 2 Nachkommastellen
+    // ("1,234 MB" sähe aus wie eintausendzweihundertvierunddreißig). Ohne steady fallen
+    // angehängte Nullen weg, steady hält die Breite für den großen Zähler fest.
+    const d = Math.min(2, v >= 100 ? Math.max(0, digits - 3) : v >= 10 ? Math.max(0, digits - 2) : Math.max(0, digits - 1));
+    return steady ? U.dec(v, d) : U.trimDec(v, d);
   }
 
   function sci(n, digits) {
     const e = Math.floor(Math.log10(n));
     const m = n / Math.pow(10, e);
-    return U.dec(m, digits - 1) + 'e' + e;
+    return U.dec(m, Math.min(2, digits - 1)) + 'e' + e;
   }
 
   // Bytes formatieren. precise: 4 signifikante Stellen (für den großen Zähler)
@@ -105,23 +107,23 @@ var DH = (typeof window !== 'undefined' ? (window.DH = window.DH || {}) : (globa
     if (mode === 'sci') return sci(n, digits) + ' B';
     if (mode === 'short') {
       const e = Math.floor(Math.log10(n) / 3);
-      if (e < SHORT.length) return sig(n / Math.pow(1000, e), digits) + ' ' + SHORT[e] + ' B';
+      if (e < SHORT.length) return sig(n / Math.pow(1000, e), digits, precise) + ' ' + SHORT[e] + ' B';
       return sci(n, digits) + ' B';
     }
     if (mode === 'bin') {
       const e = Math.floor(Math.log(n) / Math.log(1024));
       if (e < BIN.length) {
         let v = n / Math.pow(1024, e);
-        if (v >= 1000) return sig(v, digits + 1).replace(/,\d+$/, '') + ' ' + BIN[e];
-        return sig(v, digits) + ' ' + BIN[e];
+        if (v >= 1000) return sig(v, digits + 1, precise).replace(/,\d+$/, '') + ' ' + BIN[e];
+        return sig(v, digits, precise) + ' ' + BIN[e];
       }
       return sci(n, digits) + ' B';
     }
     const e = Math.floor(Math.log10(n) / 3 + 1e-9);
     if (e < SI.length) {
       let v = n / Math.pow(1000, e);
-      if (v >= 999.95 && e + 1 < SI.length) return sig(v / 1000, digits) + ' ' + SI[e + 1];
-      return sig(v, digits) + ' ' + SI[e];
+      if (v >= 999.95 && e + 1 < SI.length) return sig(v / 1000, digits, precise) + ' ' + SI[e + 1];
+      return sig(v, digits, precise) + ' ' + SI[e];
     }
     return sci(n, digits) + ' B';
   };
